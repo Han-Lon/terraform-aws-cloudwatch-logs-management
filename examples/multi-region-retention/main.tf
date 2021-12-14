@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 module "log-management-automation" {
-  source = "../.."
+  source = "../.."  # Replace with "Han-Lon/cloudwatch-logs-management/aws" in your own code
 
   # Lambda will execute once every day. It will enforce a retention policy of 14 days on all log groups in the
   # deployed region, us-west-1, and us-west-2
