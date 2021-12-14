@@ -18,52 +18,6 @@ You can create these keys in your Terraform code or manually with the AWS consol
 1. Create a symmetric key in AWS KMS (CloudWatch cannot encrypt with asymmetric keys)
 2. Assign an alias to the KMS key, such as "log-management-key"
 3. Attach a resource policy like the linked [here, lines 12-56](https://github.com/Han-Lon/terraform-aws-cloudwatch-logs-management/blob/main/examples/single-region-kms-and-retention/main.tf#L12-L56)
-      If the above link is broken, refer to this copy of the key policy:
-      `{
-    "Version": "2012-10-17",
-    "Id": "key-consolepolicy",
-    "Statement": [
-        {
-            "Sid": "Enable IAM User Permissions",
-            "Effect": "Allow",
-            "Principal": {
-                "AWS": "arn:aws:iam::${data.aws_caller_identity.current-account.account_id}:root"
-            },
-            "Action": "kms:*",
-            "Resource": "*"
-        },
-        {
-          "Sid": "Allow use of the key for Lambda IAM role",
-          "Effect": "Allow",
-          "Principal": {"AWS": [
-            "${module.log-management-automation.lambda-iam-role-arn}"
-          ]},
-          "Action": [
-            "kms:DescribeKey"
-          ],
-            "Resource": "*"
-        },
-        {
-            "Effect": "Allow",
-            "Principal": {
-                "Service": "logs.${data.aws_region.current-region.name}.amazonaws.com"
-            },
-            "Action": [
-                "kms:Encrypt*",
-                "kms:Decrypt*",
-                "kms:ReEncrypt*",
-                "kms:GenerateDataKey*",
-                "kms:Describe*"
-            ],
-            "Resource": "*",
-            "Condition": {
-                "ArnEquals": {
-                    "kms:EncryptionContext:aws:logs:arn": "arn:aws:logs:${data.aws_region.current-region.name}:${data.aws_caller_identity.current-account.account_id}:*:*"
-                }
-            }
-        }
-    ]
-}`
 4. Repeat the above steps for all other regions that are in scope for your environment
 
 ----
