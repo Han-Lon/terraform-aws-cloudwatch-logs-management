@@ -1,8 +1,16 @@
 # terraform-aws-cloudwatch-logs-management
 Automation for managing CloudWatch logs in AWS. Enforce retention policies and/or KMS encryption across all log groups in a single region or multiple regions.
 
+## Please note the _all_ log groups phrase in the description. This will enforce a defined configuration on:
+### - every log group in the AWS region the module is deployed into
+### - every log group in the defined "cross_regions" AWS regions
+
+-----
+
 ## Architecture
 ![architecture-diagram](docs/terraform-cloudwatch-management.jpg)
+
+----
 
 ## Pre-Deployment Requirements (KMS encryption only)
 These steps are only required if you want to use the KMS enforcement feature. Skip to the next section if not applicable. Due to KMS being a regional service, individual KMS keys will need to be created in each region you wish to deploy to. The aliases of these keys must be the exact same, since the Lambda will use these aliases to identify the appropriate key in each region. 
@@ -58,6 +66,7 @@ You can create these keys in your Terraform code or manually with the AWS consol
 }`
 4. Repeat the above steps for all other regions that are in scope for your environment
 
+----
 ## Inputs
 
 | Name | Description | Type | Default | Required |
