@@ -1,0 +1,21 @@
+# Ignore Terraform build files
+.terraform/
+.terraform.lock.hcl
+
+# Ignore Python virtual environments
+venv/
+env/
+
+# Ignore IDE specific directories
+.idea/
+__pycache__/
+
+
+# Do not push state files
+*.tfstate*
+
+# Do not push draw.io diagram files
+*.drawio
+
+# Do not push zip archives -- needed for the Lambda code archive
+*.zip
