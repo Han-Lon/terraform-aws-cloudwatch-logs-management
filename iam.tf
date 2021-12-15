@@ -63,8 +63,8 @@ data "aws_iam_policy_document" "log-management-encryption-doc" {
     # See the below doc for where this conditional comes from
     # https://docs.aws.amazon.com/kms/latest/developerguide/policy-conditions.html#conditions-kms-request-alias
     condition {
-      test = "StringEquals"
-      values = [var.kms_key_alias]
+      test     = "StringEquals"
+      values   = [var.kms_key_alias]
       variable = "kms:RequestAlias"
     }
   }

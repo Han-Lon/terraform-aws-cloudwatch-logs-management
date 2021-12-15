@@ -8,7 +8,7 @@ resource "aws_cloudwatch_log_group" "log-management-self-log-group" {
 # Zip up the code in lambda_code/log_management.py
 data "archive_file" "log-code-zip" {
   source_file = "${path.module}/lambda_code/log_management.py"
-  type = "zip"
+  type        = "zip"
   output_path = "${path.module}/lambda_code/log_management.zip"
 }
 
@@ -20,16 +20,16 @@ resource "aws_lambda_function" "log-management-lambda" {
   runtime       = "python3.9"
 
   memory_size = var.lambda_memory
-  timeout = var.lambda_timeout
+  timeout     = var.lambda_timeout
 
-  filename = data.archive_file.log-code-zip.output_path
+  filename         = data.archive_file.log-code-zip.output_path
   source_code_hash = data.archive_file.log-code-zip.output_base64sha256
 
   environment {
     variables = {
-      CROSS_REGIONS = var.cross_regions
+      CROSS_REGIONS     = var.cross_regions
       RETENTION_IN_DAYS = var.retention_in_days
-      KMS_KEY_ALIAS = var.kms_key_alias
+      KMS_KEY_ALIAS     = var.kms_key_alias
     }
   }
 }

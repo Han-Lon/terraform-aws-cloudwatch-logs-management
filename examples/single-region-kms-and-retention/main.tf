@@ -63,7 +63,7 @@ resource "aws_kms_alias" "log-encryption-key-alias" {
 }
 
 module "log-management-automation" {
-  source = "../.."  # Replace with "Han-Lon/cloudwatch-logs-management/aws" in your own code
+  source = "../.." # Replace with "Han-Lon/cloudwatch-logs-management/aws" in your own code
 
   # Lambda will execute once every two days. It will enforce a retention policy of 7 days on all log groups and
   # KMS encryption using the KMS key with alias "log-encryption-key"
