@@ -1,3 +1,13 @@
+variable "aws-partition" {
+  description = "The specific AWS partition to be deployed into. Vast majority of use cases will only need the regular 'aws' partition."
+  default = "aws"
+
+  validation {
+    condition = can(regex("aws|aws-us-gov|aws-cn", var.aws-partition))
+    error_message = "Please use a valid AWS partition, or comment out this validation check if the provided list is out of date."
+  }
+}
+
 data "aws_caller_identity" "current-account" {
   # To retrieve the account ID -- needed for KMS key policy
 }
@@ -8,6 +18,8 @@ data "aws_region" "current-region" {
 
 resource "aws_kms_key" "log-encryption-key" {
   description = "Key for CloudWatch log encryption"
+  deletion_window_in_days = 7
+  # Avoiding dynamic references to resources (especially the module object) to avoid circular dependencies with the key policy
   policy      = <<EOF
 {
     "Version": "2012-10-17",
@@ -17,7 +29,7 @@ resource "aws_kms_key" "log-encryption-key" {
             "Sid": "Enable IAM User Permissions",
             "Effect": "Allow",
             "Principal": {
-                "AWS": "arn:aws:iam::${data.aws_caller_identity.current-account.account_id}:root"
+                "AWS": "arn:${var.aws-partition}:iam::${data.aws_caller_identity.current-account.account_id}:root"
             },
             "Action": "kms:*",
             "Resource": "*"
@@ -26,7 +38,7 @@ resource "aws_kms_key" "log-encryption-key" {
           "Sid": "Allow use of the key for Lambda IAM role",
           "Effect": "Allow",
           "Principal": {"AWS": [
-            "${module.log-management-automation.lambda-iam-role-arn}"
+            "arn:${var.aws-partition}:iam::${data.aws_caller_identity.current-account.account_id}:role/terraform-cloudwatch-log-management-lambda-role"
           ]},
           "Action": [
             "kms:DescribeKey"
@@ -48,7 +60,7 @@ resource "aws_kms_key" "log-encryption-key" {
             "Resource": "*",
             "Condition": {
                 "ArnEquals": {
-                    "kms:EncryptionContext:aws:logs:arn": "arn:aws:logs:${data.aws_region.current-region.name}:${data.aws_caller_identity.current-account.account_id}:*:*"
+                    "kms:EncryptionContext:${var.aws-partition}:logs:arn": "arn:${var.aws-partition}:logs:${data.aws_region.current-region.name}:${data.aws_caller_identity.current-account.account_id}:*:*"
                 }
             }
         }
@@ -70,4 +82,6 @@ module "log-management-automation" {
   invocation_rate   = "rate(2 days)"
   retention_in_days = "7"
   kms_key_alias     = "log-encryption-key"
+
+  depends_on = [aws_kms_key.log-encryption-key]
 }

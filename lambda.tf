@@ -1,8 +1,14 @@
+data "aws_kms_key" "log-encryption-key" {
+  count = var.kms_key_alias != "None" ? 1 : 0
+  key_id = "alias/${var.kms_key_alias}"
+}
+
 # Create a CloudWatch log group for the Lambda function
 resource "aws_cloudwatch_log_group" "log-management-self-log-group" {
   name = "/aws/lambda/${aws_lambda_function.log-management-lambda.function_name}"
 
   retention_in_days = var.retention_in_days != "None" ? tonumber(var.retention_in_days) : 7
+  kms_key_id = var.kms_key_alias != "None" ? data.aws_kms_key.log-encryption-key[0].arn : null
 }
 
 # Zip up the code in lambda_code/log_management.py
