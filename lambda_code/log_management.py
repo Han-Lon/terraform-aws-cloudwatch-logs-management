@@ -51,6 +51,7 @@ def configure_log_groups(cw, log_groups):
         key_id = retrieve_kms_key_id()
 
     for log_group in log_groups:
+        # If a KMS key alias is supplied, try to encrypt all log groups with that KMS key
         if os.environ.get("KMS_KEY_ALIAS", "None") != "None":
             try:
                 cw.associate_kms_key(
@@ -59,6 +60,16 @@ def configure_log_groups(cw, log_groups):
                 )
             except Exception as e:
                 print(f"Ran into error when encrypting log group {log_group['logGroupName']} in {cw.meta.region_name}")
+                print(traceback.format_exc())
+        # If a KMS key is not supplied AND we want to allow KMS disassociation from Cloudwatch, try to disassociate KMS keys from Cloudwatch
+        # This will remove KMS associations for ALL Cloudwatch log groups in the specified account and region(s)
+        if os.environ.get("KMS_KEY_ALIAS", "None") == "None" and os.environ.get("ALLOW_KMS_DISASSOCIATE", "False") == "True":
+            try:
+                cw.disassociate_kms_key(
+                    logGroupName=log_group['logGroupName'],
+                )
+            except Exception as e:
+                print(f"Ran into error when removing encryption for log group {log_group['logGroupName']} in {cw.meta.region_name}")
                 print(traceback.format_exc())
         if os.environ.get("RETENTION_IN_DAYS", "None") != "None":
             try:

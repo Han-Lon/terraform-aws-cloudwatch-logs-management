@@ -48,3 +48,14 @@ variable "lambda_timeout" {
   default     = 30
   description = "Amount of time, in seconds, for the Lambda function timeout. Increase if receiving timeout errors."
 }
+
+variable "allow_kms_disassociate" {
+  type = string
+  default = "False"
+  description = "Whether or not to allow the log manager to remove KMS keys from log groups. Be warned this is a DANGEROUS operation, and can lead to you being unable to access previously encrypted logs if the associated KMS key is destroyed."
+
+  validation {
+    condition = can(regex("True|False", var.allow_kms_disassociate))
+    error_message = "Please supply either \"True\" or \"False\"."
+  }
+}

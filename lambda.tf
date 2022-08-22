@@ -36,6 +36,7 @@ resource "aws_lambda_function" "log-management-lambda" {
       CROSS_REGIONS     = var.cross_regions
       RETENTION_IN_DAYS = var.retention_in_days
       KMS_KEY_ALIAS     = var.kms_key_alias
+      ALLOW_KMS_DISASSOCIATE = var.allow_kms_disassociate
     }
   }
 }
